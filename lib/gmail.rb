@@ -67,7 +67,7 @@ module Gmail
             else
                 MessageWrapper.new(result)
             end
-          end
+        end
 
         def op(ids)
             messages = []
