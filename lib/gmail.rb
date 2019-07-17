@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'byebug'
 require "google/apis/gmail_v1"
 
 require "./lib/auth.rb"
@@ -68,23 +69,35 @@ module Gmail
 
     def create_wrapper(result, err)
       if err
-        LOG.error("create_wrapper") { "Error: #{err.message}" }
+        raise err
       else
         MessageWrapper.new(result)
       end
     end
 
+    def backoff
+      @delay ||= 1
+      sleep(@delay)
+      @delay *= 2
+    end
+
     def op(ids)
-      LOG.info("op") { "Operating on #{ids.length} message(s)" }
+      LOG.debug("op") { "Operating on #{ids.length} message(s)" }
       messages = []
       ids.each_slice(MAX_SLICE_SIZE) do |ids_array|
-        LOG.info("op") { "Operating on slice of #{ids_array.length} message(s)" }
-        @gmail.batch do |gm|
-          ids_array.map do |id|
-            gm.get_user_message("me", id) do |result, err|
-              messages << create_wrapper(result, err)
+        begin
+          LOG.debug("op") { "Operating on slice of #{ids_array.length} message(s) from #{ids_array[0]}" }
+          @gmail.batch do |gm|
+            ids_array.map do |id|
+              gm.get_user_message("me", id) do |result, err|
+                messages << create_wrapper(result, err)
+              end
             end
           end
+        rescue Google::Apis::RateLimitError => e
+          LOG.warn("op") { "Warning: Rate limit exceeded (#{e.message})" }
+          backoff
+          retry
         end
       end
       messages
