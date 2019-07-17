@@ -4,5 +4,8 @@ source "https://rubygems.org"
 
 gem "google-api-client", "~> 0.30"
 
-gem "byebug"
-gem "rubocop"
+group :development, :test do
+  gem "byebug"
+  gem "rake"
+  gem "rubocop"
+end
