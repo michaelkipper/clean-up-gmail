@@ -3,5 +3,9 @@
 	"dockerFile": "Dockerfile",
 	"extensions": [
 		"rebornix.ruby",
-	]
+	],
+	"runArgs": [
+		"-v", "${env:HOME}${env:USERPROFILE}/.ssh:/root"
+	],
+	"postCreateCommand": "bash scripts/post-create.sh"
 }
