@@ -1,3 +1,8 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
 
-gem 'google-api-client', '~> 0.30'
+source "https://rubygems.org"
+
+gem "google-api-client", "~> 0.30"
+
+gem "byebug"
+gem "rubocop"
